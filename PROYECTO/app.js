@@ -1,4 +1,4 @@
-const express = require('express');
+import express from "express";
 const ProductManager = require('./desafio');
 const handlebars = require ('express-handlebars')
 
