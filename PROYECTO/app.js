@@ -1,16 +1,15 @@
 import express from "express";
-const ProductManager = require('./desafio');
-const handlebars = require ('express-handlebars')
+import handlebars from 'express-handlebars'
 
-
+import { productDao } from "./dao/dao.factory.js";
 
 
 const app = express();
-const productManager = new ProductManager('products.json');
 
-app.engine('handlebars',handlebars());
+
+app.engine('handlebars',handlebars.engine())
 app.set ('view engine','handlebars');
-app.set ('views',__dirname + '/views')
+//app.set ('views','/views')
 
 // Middleware para manejar el cuerpo de las solicitudes
 app.use(express.json());
@@ -19,7 +18,7 @@ app.use(express.json());
 app.get('/api/products', (req, res) => {
     try {
         const limit = parseInt(req.query.limit);
-        const products = productManager.getProducts();
+        const products = productDao.getProducts();
         
         if (!limit || isNaN(limit)) {
             res.json(products);
@@ -34,7 +33,8 @@ app.get('/api/products', (req, res) => {
 // Endpoint para agregar un nuevo producto
 app.post('/api/products', (req, res) => {
     try {
-        const newProduct = productManager.addProduct(req.body);
+        console.log(req.body);
+        const newProduct = productDao.addProduct(req.body);
         res.status(201).json(newProduct);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -44,7 +44,7 @@ app.post('/api/products', (req, res) => {
 app.get('/api/products/:pid',(req, res)=>{
     try {
         const productId = req.params.pid;
-        const product = productManager.getProductById(productId);
+        const product = productDao.getProductById(productId);
         res.json (product);
     }catch (error) {
         res.status(404).json({error:error.message});
@@ -54,7 +54,7 @@ app.get('/api/products/:pid',(req, res)=>{
 app.put('/api/products/:pid', (req, res) => {
     try {
         const productId = req.params.pid;
-        productManager.updateProduct(productId, req.body);
+        productDao.updateProduct(productId, req.body);
         res.status(200).send ('Producto actualizado exitosamente');
     } catch (error) {
         res.status(400).json({error: error.message});
@@ -64,7 +64,7 @@ app.put('/api/products/:pid', (req, res) => {
 app.delete('/api/products/:pid', (req, res) => {
     try {
         const productId = req.params.pid;
-        productManager.deleteProduct (productId);
+        productDao.deleteProduct (productId);
         res.status (200).send('Producto eliminado exitosamente');
     } catch (error) {
         res.status(404).json({error: error.message});
